@@ -1,31 +1,35 @@
 import { CloseIcon } from "@src/assets/icons/Close";
 import { TaskProp } from "@src/data/boardEntries";
-import { TaskManager } from "@src/data/taskManager";
+import { useAppDispatch, useAppSelector } from "@src/hooks/redux";
+import { updateTask } from "@src/store/slices/boardSlice";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 
 type Props = {
-	onSave: (task: TaskProp) => void;
 	onClose: () => void;
 };
 
-export function TaskDetails({ onSave, onClose }: Props) {
+export function TaskDetails({ onClose }: Props) {
 	const navigate = useNavigate();
+	const dispatch = useAppDispatch();
 	const { boardId, taskId } = useParams<{ boardId: string; taskId: string }>();
-	const [task, setTask] = useState<TaskProp | null>(null);
 	const [title, setTitle] = useState('');
 	const [content, setContent] = useState('');
 
-	useEffect(() => {
+	const task = useAppSelector((state) => {
 		if (boardId && taskId) {
-			const existingTask = TaskManager.getTask(boardId, Number(taskId));
-			if (existingTask) {
-				setTask(existingTask);
-				setTitle(existingTask.title);
-				setContent(existingTask.content);
-			}
+			return state.boards.boards
+				.find((board) => board.id === boardId)
+				?.tasks.find((task) => task.id === Number(taskId));
 		}
-	}, [boardId, taskId]);
+		return null;
+	});
+	useEffect(() => {
+		if (task) {
+			setTitle(task.title);
+			setContent(task.content);
+		}
+	}, [task]);
 
 	const handleSave = () => {
 		if (!title.trim()) {
@@ -44,8 +48,11 @@ export function TaskDetails({ onSave, onClose }: Props) {
 			title,
 			content
 		};
-
-		onSave(updatedTask);
+		dispatch(updateTask({
+			boardId,
+			taskId: Number(taskId),
+			updates: updatedTask
+		}));
 		navigate('/');
 	};
 
