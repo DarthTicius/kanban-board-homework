@@ -34,10 +34,7 @@ export function Board() {
 							columnId={board.id}
 							title={board.title}
 							tasks={board.tasks}
-							onCreateTask={() => handleAddTask(board.id)}
-							onUpdateTask={handleUpdateTask}
-							onDeleteTask={handleDeleteTask}
-						/>
+							onCreateTask={() => handleAddTask(board.id)} />
 					))}
 				</div>
 			</div>
