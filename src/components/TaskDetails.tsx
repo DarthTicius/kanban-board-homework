@@ -55,7 +55,7 @@ export function TaskDetails({ onSave, onClose }: Props) {
 	};
 
 	return (
-		<div className="fixed top-0 right-0 h-full w-1/3 bg-white shadow-lg p-4">
+		<div className="fixed top-0 right-0 h-full w-11/12 md:w-1/3 bg-white shadow-lg p-4 z-50">
 			<div className="flex justify-between items-center mb-4">
 				<h2 className="text-lg font-bold">{task ? 'Edit Task' : 'New Task'}</h2>
 				<button
