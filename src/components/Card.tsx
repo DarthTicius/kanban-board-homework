@@ -1,32 +1,47 @@
 import { Calendar } from "@src/assets/icons/Calendar";
 import { CloseIcon } from "@src/assets/icons/Close";
+import { TaskProp } from "@src/data/boardEntries";
+import { useNavigate } from "react-router";
 
 type CardProps = {
-	title: string;
-	content: string;
+	task: TaskProp;
+	columnId: string;
+	index: number;
+	onUpdate: (boardId: string, taskId: number, updates: Partial<TaskProp>) => void;
+	onDelete: (boardId: string, taskId: number) => void;
 };
-export function Card({ title, content }: CardProps) {
+export function Card({ task, columnId, index, onUpdate, onDelete }: CardProps) {
+	const navigate = useNavigate();
 	const date = new Date();
-	const formattedDate = new Intl.DateTimeFormat("en-UK", {
-		month: "short",
-		day: "2-digit",
+	const formattedDate = new Intl.DateTimeFormat('en-UK', {
+		month: 'short',
+		day: '2-digit',
 	}).format(date);
+
+	const handleEdit = () => {
+		navigate(`/board/${columnId}/task/${task.id}`);
+	};
 
 	return (
 		<div
 			className="group/card relative flex flex-col items-start p-4 mt-3 bg-white rounded-lg cursor-pointer bg-opacity-90 hover:bg-opacity-100"
 			draggable="true"
+			onDoubleClick={handleEdit}
 		>
 			<button className="absolute top-0 right-0 hidden items-center justify-center w-5 h-5 mt-3 mr-2 text-gray-500 rounded group-hover/card:bg-gray-200 group-hover/card:text-gray-700 group-hover/card:flex">
-				<CloseIcon className="w-4 h-4 fill-current" />
+				<CloseIcon
+					className="w-4 h-4 fill-current"
+					onClick={() => {
+						console.log("delete");
+						onDelete(columnId, task.id);
+					}}
+				/>
 			</button>
 			<h3 className="flex items-center h-6 px-3 text-xs font-semibold bg-pink-100 rounded-full">
-				{title}
+				{task.title}
 			</h3>
 			<div className="overflow-hidden text-ellipsis whitespace-normal line-clamp-2">
-				<p className="mt-3 text-sm font-medium ">
-					{content}
-				</p>
+				<p className="mt-3 text-sm font-medium ">{task.content}</p>
 			</div>
 			<div className="flex items-center w-full mt-3 text-xs font-medium text-gray-400">
 				<div className="flex items-center">
