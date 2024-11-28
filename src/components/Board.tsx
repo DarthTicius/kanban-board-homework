@@ -1,34 +1,24 @@
 import { Column } from "@components/Column";
-import { BoardProp, TaskProp } from "@src/data/boardEntries";
-import { TaskManager } from "@src/data/taskManager";
-import { Dispatch, SetStateAction } from "react";
+import { useAppDispatch, useAppSelector } from "@src/hooks/redux";
+import { addTask } from "@src/store/slices/boardSlice";
 import { useNavigate } from "react-router";
 
-type Props = {
-	boards: BoardProp[];
-	setBoards: Dispatch<SetStateAction<BoardProp[]>>;
-};
 
-export function Board({ boards, setBoards }: Props) {
+export function Board() {
 	const navigate = useNavigate();
-	const handleAddTask = (boardId: string): void => {
-		const newTask = TaskManager.addTask(boardId, {
+	const dispatch = useAppDispatch();
+	const boards = useAppSelector((state) => state.boards.boards);
+
+	const handleAddTask = (boardId: string) => {
+		const newTask = {
 			title: "",
 			content: "",
 			boardId
-		});
-		setBoards(TaskManager.getAllBoards());
-		navigate(`/board/${boardId}/task/${newTask.id}`);
-	};
+		};
 
-	const handleUpdateTask = (boardId: string, taskId: number, updates: Partial<TaskProp>): void => {
-		TaskManager.updateTask(boardId, taskId, updates);
-		setBoards(TaskManager.getAllBoards());
-	};
-
-	const handleDeleteTask = (boardId: string, taskId: number): void => {
-		TaskManager.deleteTask(boardId, taskId);
-		setBoards(TaskManager.getAllBoards());
+		const taskId = Date.now();
+		dispatch(addTask({ boardId, task: newTask }));
+		navigate(`/board/${boardId}/task/${taskId}`);
 	};
 
 	return (
