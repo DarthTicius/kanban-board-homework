@@ -1,15 +1,13 @@
-import { Board } from '@components/Board';
-import { Footer } from '@components/Footer';
-import { Header } from '@components/Header';
-import { Layout } from '@layout/Layout';
+import { Layout } from "@layout/Layout";
+import { BrowserRouter } from 'react-router';
 
 function App() {
+
+
 	return (
-		<Layout >
-			<Header />
-			<Board />
-			<Footer />
-		</Layout>
+		<BrowserRouter>
+			<Layout />
+		</BrowserRouter>
 	);
 }
 
