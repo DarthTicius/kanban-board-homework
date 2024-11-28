@@ -1,23 +1,27 @@
 import { Card } from "@components/Card";
 import { DownCaret } from "@src/assets/icons/DownCaret";
 import { TaskProp } from "@src/data/boardEntries";
+import { useAppDispatch } from "@src/hooks/redux";
+import { deleteTask } from "@src/store/slices/boardSlice";
+import { useNavigate } from "react-router";
 
 type Props = {
+	columnId: string;
 	title: string;
 	tasks: TaskProp[];
-	columnId: string;
 	onCreateTask: () => void;
-	onUpdateTask: (boardId: string, taskId: number, updates: Partial<TaskProp>) => void;
-	onDeleteTask: (boardId: string, taskId: number) => void;
 };
-export function Column({
-	columnId,
-	title,
-	tasks,
-	onCreateTask,
-	onUpdateTask,
-	onDeleteTask
-}: Props) {
+export function Column({ columnId, title, tasks, onCreateTask }: Props) {
+	const dispatch = useAppDispatch();
+	const navigate = useNavigate();
+
+	const handleDeleteTask = (taskId: number) => {
+		dispatch(deleteTask({ boardId: columnId, taskId }));
+	};
+
+	const handleTaskClick = (taskId: number) => {
+		navigate(`/board/${columnId}/task/${taskId}`);
+	};
 	return (
 		<details
 			className="group/column flex flex-col flex-shrink-0 w-full md:w-72"
@@ -61,10 +65,8 @@ export function Column({
 						key={`${task.id}`}
 						task={task}
 						columnId={columnId}
-						index={idx}
-						onUpdate={onUpdateTask}
-						onDelete={onDeleteTask}
-					/>
+						onDelete={() => handleDeleteTask(task.id)}
+						onClick={() => handleTaskClick(task.id)} />
 				))}
 			</div>
 		</details>

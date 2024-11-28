@@ -7,12 +7,12 @@ import { useNavigate } from "react-router";
 type CardProps = {
 	task: TaskProp;
 	columnId: string;
-	index: number;
-	onUpdate: (boardId: string, taskId: number, updates: Partial<TaskProp>) => void;
-	onDelete: (boardId: string, taskId: number) => void;
+	onDelete: () => void;
+	onClick: () => void;
 };
-export function Card({ task, columnId, index, onUpdate, onDelete }: CardProps) {
+export function Card({ task, columnId, onClick, onDelete }: CardProps) {
 	const navigate = useNavigate();
+
 	const date = new Date();
 	const formattedDate = new Intl.DateTimeFormat('en-UK', {
 		month: 'short',
@@ -56,7 +56,7 @@ export function Card({ task, columnId, index, onUpdate, onDelete }: CardProps) {
 					className="w-4 h-4 fill-current"
 					onClick={(e) => {
 						e.stopPropagation();
-						onDelete(columnId, task.id);
+						onDelete();
 					}}
 				/>
 			</button>
