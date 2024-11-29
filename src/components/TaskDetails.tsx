@@ -1,7 +1,6 @@
 import { CloseIcon } from "@src/assets/icons/Close";
-import { TaskProp } from "@src/data/boardEntries";
 import { useAppDispatch, useAppSelector } from "@src/hooks/redux";
-import { updateTask } from "@src/store/slices/boardSlice";
+import { addTask, updateTask } from "@src/store/slices/boardSlice";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 
@@ -13,17 +12,20 @@ export function TaskDetails({ onClose }: Props) {
 	const navigate = useNavigate();
 	const dispatch = useAppDispatch();
 	const { boardId, taskId } = useParams<{ boardId: string; taskId: string }>();
-	const [title, setTitle] = useState('');
-	const [content, setContent] = useState('');
+	const [title, setTitle] = useState("");
+	const [content, setContent] = useState("");
+	const [isNew] = useState(!taskId || taskId === "new");
 
+	// Get the task from Redux store
 	const task = useAppSelector((state) => {
-		if (boardId && taskId) {
-			return state.boards.boards
-				.find((board) => board.id === boardId)
-				?.tasks.find((task) => task.id === Number(taskId));
-		}
-		return null;
+		if (!boardId || !taskId || isNew) return null;
+
+		const board = state.boards.boards.find((b) => b.id === boardId);
+		const foundTask = board?.tasks.find((t) => t.id === Number(taskId));
+		return foundTask || null;
 	});
+
+	// Load task data when component mounts or when task changes
 	useEffect(() => {
 		if (task) {
 			setTitle(task.title);
@@ -33,38 +35,52 @@ export function TaskDetails({ onClose }: Props) {
 
 	const handleSave = () => {
 		if (!title.trim()) {
-			alert('Task title cannot be empty.');
+			alert("Task title cannot be empty.");
 			return;
 		}
 
-		if (!boardId || !taskId) {
-			console.error('Missing boardId or taskId');
+		if (!boardId) {
+			console.error("Missing boardId");
 			return;
 		}
 
-		const updatedTask: TaskProp = {
-			id: Number(taskId),
-			boardId,
-			title,
-			content
-		};
-		dispatch(updateTask({
-			boardId,
-			taskId: Number(taskId),
-			updates: updatedTask
-		}));
-		navigate('/');
+		if (isNew) {
+			dispatch(
+				addTask({
+					boardId,
+					task: {
+						title,
+						content,
+					},
+				}),
+			);
+		} else {
+			dispatch(
+				updateTask({
+					boardId,
+					taskId: Number(taskId),
+					updates: {
+						title,
+						content,
+					},
+				}),
+			);
+		}
+
+		handleClose();
 	};
 
 	const handleClose = () => {
 		onClose();
-		navigate('/');
+		navigate("/");
 	};
 
 	return (
 		<div className="fixed top-0 right-0 h-full w-11/12 md:w-1/3 bg-white shadow-lg p-4 z-50">
 			<div className="flex justify-between items-center mb-4">
-				<h2 className="text-lg font-bold">{task ? 'Edit Task' : 'New Task'}</h2>
+				<h2 className="text-lg font-bold">
+					{isNew ? "New Task" : `Edit Task: ${task?.title}`}
+				</h2>
 				<button
 					onClick={handleClose}
 					className="text-gray-500 hover:text-gray-800"
