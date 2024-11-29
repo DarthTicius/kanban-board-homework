@@ -29,9 +29,8 @@ export function Column({
 
 	return (
 		<div
-			className={`group/column flex flex-col flex-shrink-0 w-full md:w-72 ${
-				isOver ? "bg-indigo-50" : ""
-			}`}
+			className={`group/column flex flex-col flex-shrink-0 w-full md:w-72 ${isOver ? "bg-indigo-50" : ""
+				}`}
 		>
 			<details open data-column-id={columnId}>
 				<summary className="flex justify-between items-center h-10 px-2">

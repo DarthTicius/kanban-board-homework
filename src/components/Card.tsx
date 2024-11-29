@@ -30,11 +30,11 @@ export function Card({ task, columnId, onDelete }: CardProps) {
 
 	const style = transform
 		? {
-				transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-				transition: "transform 0.2s ease",
-				zIndex: isDragging ? 50 : "auto",
-				opacity: isDragging ? 0.5 : 1,
-			}
+			transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+			transition: "transform 0.2s ease",
+			zIndex: isDragging ? 50 : "auto",
+			opacity: isDragging ? 0.5 : 1,
+		}
 		: undefined;
 
 	const date = new Date();
