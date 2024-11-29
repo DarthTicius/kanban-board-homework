@@ -99,14 +99,8 @@ const boardSlice = createSlice({
 				destinationIndex?: number;
 			}>,
 		) => {
-			const {
-				activeId,
-				overId,
-				sourceBoardId,
-				destinationBoardId,
-				sourceIndex,
-				destinationIndex,
-			} = action.payload;
+			const { activeId, sourceBoardId, destinationBoardId, destinationIndex } =
+				action.payload;
 
 			const sourceBoard = state.boards.find(
 				(board) => board.id === sourceBoardId,

@@ -10,10 +10,9 @@ import { useNavigate } from "react-router";
 type CardProps = {
 	task: TaskProp;
 	columnId: string;
-	index: number;
 	onDelete: (taskId: number, boardId: string) => void;
 };
-export function Card({ task, columnId, index, onDelete }: CardProps) {
+export function Card({ task, columnId, onDelete }: CardProps) {
 	const navigate = useNavigate();
 
 	const { attributes, listeners, setNodeRef, transform, isDragging } =

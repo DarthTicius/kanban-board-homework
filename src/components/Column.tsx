@@ -70,11 +70,10 @@ export function Column({
 					strategy={verticalListSortingStrategy}
 				>
 					<div className="space-y-4 pb-4" ref={setNodeRef}>
-						{tasks.map((task, index) => (
+						{tasks.map((task) => (
 							<Card
 								key={task.id}
 								task={task}
-								index={index}
 								columnId={columnId}
 								onDelete={() => onDeleteTask(task.id, columnId)}
 							/>

@@ -55,17 +55,19 @@ export function Board() {
 	const handleDragOver = useCallback(
 		(event: DragOverEvent) => {
 			const { active, over } = event;
-			if (!over || active.id === over.id) return;
+			if (!over || active.id === over.id) {
+				return;
+			}
 
-			const activeId = Number(active.id);
+			const activeIdx = Number(activeId);
 			const overId = Number(over.id);
 
-			const activeBoard = findBoardByTaskId(activeId);
+			const activeBoard = findBoardByTaskId(activeIdx);
 			const overBoard = findBoardByTaskId(overId);
 
 			if (activeBoard && overBoard && activeBoard.id !== overBoard.id) {
 				const sourceIndex = activeBoard.tasks.findIndex(
-					(task) => task.id === activeId,
+					(task) => task.id === activeIdx,
 				);
 				const destinationIndex = overBoard.tasks.findIndex(
 					(task) => task.id === overId,
@@ -73,7 +75,7 @@ export function Board() {
 
 				dispatch(
 					moveTask({
-						activeId,
+						activeId: activeIdx,
 						overId,
 						sourceBoardId: activeBoard.id,
 						destinationBoardId: overBoard.id,
@@ -147,7 +149,6 @@ export function Board() {
 					<Card
 						task={dragOverlay}
 						columnId={dragOverlay.boardId}
-						index={0}
 						onDelete={handleDeleteTask}
 					/>
 				) : null}
