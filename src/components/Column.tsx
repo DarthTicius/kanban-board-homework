@@ -6,12 +6,25 @@ import { deleteTask } from "@src/store/slices/boardSlice";
 import { useNavigate } from "react-router";
 
 type Props = {
-	columnId: string;
 	title: string;
 	tasks: TaskProp[];
+	columnId: string;
 	onCreateTask: () => void;
+	onUpdateTask: (
+		boardId: string,
+		taskId: number,
+		updates: Partial<TaskProp>,
+	) => void;
+	onDeleteTask: (boardId: string, taskId: number) => void;
 };
-export function Column({ columnId, title, tasks, onCreateTask }: Props) {
+export function Column({
+	columnId,
+	title,
+	tasks,
+	onCreateTask,
+	onUpdateTask,
+	onDeleteTask,
+}: Props) {
 	const dispatch = useAppDispatch();
 	const navigate = useNavigate();
 
@@ -65,8 +78,10 @@ export function Column({ columnId, title, tasks, onCreateTask }: Props) {
 						key={`${task.id}`}
 						task={task}
 						columnId={columnId}
-						onDelete={() => handleDeleteTask(task.id)}
-						onClick={() => handleTaskClick(task.id)} />
+						index={idx}
+						onUpdate={onUpdateTask}
+						onDelete={onDeleteTask}
+					/>
 				))}
 			</div>
 		</details>

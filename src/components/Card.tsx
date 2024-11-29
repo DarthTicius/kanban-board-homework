@@ -7,16 +7,21 @@ import { useNavigate } from "react-router";
 type CardProps = {
 	task: TaskProp;
 	columnId: string;
-	onDelete: () => void;
-	onClick: () => void;
+	index: number;
+	onUpdate: (
+		boardId: string,
+		taskId: number,
+		updates: Partial<TaskProp>,
+	) => void;
+	onDelete: (boardId: string, taskId: number) => void;
 };
-export function Card({ task, columnId, onClick, onDelete }: CardProps) {
+export function Card({ task, columnId, index, onUpdate, onDelete }: CardProps) {
 	const navigate = useNavigate();
 
 	const date = new Date();
-	const formattedDate = new Intl.DateTimeFormat('en-UK', {
-		month: 'short',
-		day: '2-digit',
+	const formattedDate = new Intl.DateTimeFormat("en-UK", {
+		month: "short",
+		day: "2-digit",
 	}).format(date);
 
 	const handleEdit = () => {
@@ -27,7 +32,7 @@ export function Card({ task, columnId, onClick, onDelete }: CardProps) {
 
 	const handleTouch = (e: TouchEvent) => {
 		e.preventDefault();
-		setTouchCount(prev => prev + 1);
+		setTouchCount((prev) => prev + 1);
 
 		if (touchTimeout.current) {
 			clearTimeout(touchTimeout.current);
@@ -43,11 +48,10 @@ export function Card({ task, columnId, onClick, onDelete }: CardProps) {
 		}
 	};
 
-
 	return (
 		<div
 			className="group/card relative flex flex-col items-start p-4 mt-3 bg-white rounded-lg cursor-pointer bg-opacity-90 hover:bg-opacity-100"
-			draggable="true"
+			draggable
 			onDoubleClick={handleEdit}
 			onTouchStart={handleTouch}
 		>
@@ -56,7 +60,7 @@ export function Card({ task, columnId, onClick, onDelete }: CardProps) {
 					className="w-4 h-4 fill-current"
 					onClick={(e) => {
 						e.stopPropagation();
-						onDelete();
+						onDelete(columnId, task.id);
 					}}
 				/>
 			</button>
