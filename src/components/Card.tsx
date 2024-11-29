@@ -1,3 +1,4 @@
+import { useDraggable } from "@dnd-kit/core";
 import { Calendar } from "@src/assets/icons/Calendar";
 import { CloseIcon } from "@src/assets/icons/Close";
 import { TaskProp } from "@src/data/boardEntries";
@@ -17,6 +18,19 @@ type CardProps = {
 };
 export function Card({ task, columnId, index, onUpdate, onDelete }: CardProps) {
 	const navigate = useNavigate();
+	const { attributes, listeners, setNodeRef, transform } = useDraggable({
+		id: task.id.toString(),
+		data: {
+			task,
+			columnId,
+			index,
+		},
+	});
+	const style = transform
+		? {
+				transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+			}
+		: undefined;
 
 	const date = new Date();
 	const formattedDate = new Intl.DateTimeFormat("en-UK", {
@@ -50,6 +64,10 @@ export function Card({ task, columnId, index, onUpdate, onDelete }: CardProps) {
 
 	return (
 		<div
+			ref={setNodeRef}
+			style={style}
+			{...attributes}
+			{...listeners}
 			className="group/card relative flex flex-col items-start p-4 mt-3 bg-white rounded-lg cursor-pointer bg-opacity-90 hover:bg-opacity-100"
 			draggable
 			onDoubleClick={handleEdit}

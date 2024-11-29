@@ -1,4 +1,5 @@
 import { Card } from "@components/Card";
+import { useDroppable } from "@dnd-kit/core";
 import { DownCaret } from "@src/assets/icons/DownCaret";
 import { TaskProp } from "@src/data/boardEntries";
 import { useAppDispatch } from "@src/hooks/redux";
@@ -10,6 +11,13 @@ type Props = {
 	tasks: TaskProp[];
 	columnId: string;
 	onCreateTask: () => void;
+	onMoveTask: (
+		taskId: number,
+		sourceBoardId: string,
+		destinationBoardId: string,
+		sourceIndex: number,
+		destinationIndex: number,
+	) => void;
 	onUpdateTask: (
 		boardId: string,
 		taskId: number,
@@ -17,6 +25,7 @@ type Props = {
 	) => void;
 	onDeleteTask: (boardId: string, taskId: number) => void;
 };
+
 export function Column({
 	columnId,
 	title,
@@ -27,6 +36,13 @@ export function Column({
 }: Props) {
 	const dispatch = useAppDispatch();
 	const navigate = useNavigate();
+	const { setNodeRef } = useDroppable({
+		id: columnId,
+		data: {
+			boardId: columnId,
+			type: "column",
+		},
+	});
 
 	const handleDeleteTask = (taskId: number) => {
 		dispatch(deleteTask({ boardId: columnId, taskId }));
@@ -72,7 +88,11 @@ export function Column({
 					</div>
 				</div>
 			</summary>
-			<div className="flex flex-col pb-2 overflow-auto">
+			<div
+				ref={setNodeRef}
+				className="flex flex-col pb-2 overflow-auto"
+				data-column-id={columnId}
+			>
 				{tasks.map((task, idx) => (
 					<Card
 						key={`${task.id}`}
