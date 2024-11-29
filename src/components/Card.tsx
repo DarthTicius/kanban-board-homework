@@ -1,6 +1,7 @@
 import { useDraggable } from "@dnd-kit/core";
 import { Calendar } from "@src/assets/icons/Calendar";
 import { CloseIcon } from "@src/assets/icons/Close";
+import { DragIcon } from "@src/assets/icons/DragIcon";
 import { TaskProp } from "@src/data/boardEntries";
 import { motion } from "motion/react";
 import { useRef, useState, type TouchEvent } from "react";
@@ -67,8 +68,6 @@ export function Card({ task, columnId, index, onDelete }: CardProps) {
 		<motion.div
 			ref={setNodeRef}
 			style={style}
-			{...attributes}
-			{...listeners}
 			layout
 			initial={{ opacity: 0, scale: 0.9 }}
 			animate={{
@@ -88,6 +87,15 @@ export function Card({ task, columnId, index, onDelete }: CardProps) {
 					}}
 				/>
 			</button>
+			<button
+				{...attributes}
+				{...listeners}
+				type="button"
+				className="absolute top-1/2 right-0 hidden items-center justify-center w-5 h-6 mt-3 mr-2 text-gray-500 rounded group-hover/card:bg-gray-200 group-hover/card:text-gray-700 group-hover/card:flex z-10"
+			>
+				<DragIcon className="w-3.5 h-3.5 p-0.5" />
+			</button>
+
 			<h3 className="flex items-center h-6 px-3 text-xs font-semibold bg-pink-100 rounded-full">
 				{task.title}
 			</h3>
