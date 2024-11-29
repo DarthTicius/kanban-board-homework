@@ -21,7 +21,7 @@ const boardSlice = createSlice({
 		},
 		addTask: (
 			state,
-			action: PayloadAction<{ boardId: string; task: Omit<TaskProp, "id"> }>,
+			action: PayloadAction<{ boardId: string; task: Partial<TaskProp> }>,
 		) => {
 			const { boardId, task } = action.payload;
 			const boardIndex = state.boards.findIndex(
@@ -30,11 +30,15 @@ const boardSlice = createSlice({
 
 			if (boardIndex !== -1) {
 				const newTask: TaskProp = {
-					...task,
 					id: Date.now(),
 					boardId,
+					title: task.title || "New Task",
+					content: task.content || "",
+					order: state.boards[boardIndex].tasks.length,
 				};
+
 				state.boards[boardIndex].tasks.push(newTask);
+				localStorage.setItem("kanbanBoards", JSON.stringify(state.boards));
 			}
 		},
 		updateTask: (
@@ -60,6 +64,7 @@ const boardSlice = createSlice({
 						...state.boards[boardIndex].tasks[taskIndex],
 						...updates,
 					};
+					localStorage.setItem("kanbanBoards", JSON.stringify(state.boards));
 				}
 			}
 		},
