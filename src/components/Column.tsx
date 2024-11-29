@@ -69,7 +69,7 @@ export function Column({
 					items={tasks.map((task) => task.id)}
 					strategy={verticalListSortingStrategy}
 				>
-					<div className="space-y-4" ref={setNodeRef}>
+					<div className="space-y-4 pb-4" ref={setNodeRef}>
 						{tasks.map((task, index) => (
 							<Card
 								key={task.id}
