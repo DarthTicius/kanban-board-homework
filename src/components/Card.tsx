@@ -2,6 +2,7 @@ import { useDraggable } from "@dnd-kit/core";
 import { Calendar } from "@src/assets/icons/Calendar";
 import { CloseIcon } from "@src/assets/icons/Close";
 import { TaskProp } from "@src/data/boardEntries";
+import { motion } from "motion/react";
 import { useRef, useState, type TouchEvent } from "react";
 import { useNavigate } from "react-router";
 
@@ -9,26 +10,30 @@ type CardProps = {
 	task: TaskProp;
 	columnId: string;
 	index: number;
-	onUpdate: (
-		boardId: string,
-		taskId: number,
-		updates: Partial<TaskProp>,
-	) => void;
-	onDelete: (boardId: string, taskId: number) => void;
+	onDelete: (taskId: number, boardId: string) => void;
 };
-export function Card({ task, columnId, index, onUpdate, onDelete }: CardProps) {
+export function Card({ task, columnId, index, onDelete }: CardProps) {
 	const navigate = useNavigate();
-	const { attributes, listeners, setNodeRef, transform } = useDraggable({
-		id: task.id.toString(),
-		data: {
-			task,
-			columnId,
-			index,
-		},
-	});
+
+	const { attributes, listeners, setNodeRef, transform, isDragging } =
+		useDraggable({
+			id: task.id.toString(),
+		});
+
+	const handleDelete = () => {
+		onDelete(task.id, columnId);
+	};
+
+	const handleEdit = () => {
+		navigate(`/board/${columnId}/task/${task.id}`);
+	};
+
 	const style = transform
 		? {
 				transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+				transition: "transform 0.2s ease",
+				zIndex: isDragging ? 50 : "auto",
+				opacity: isDragging ? 0.5 : 1,
 			}
 		: undefined;
 
@@ -37,10 +42,6 @@ export function Card({ task, columnId, index, onUpdate, onDelete }: CardProps) {
 		month: "short",
 		day: "2-digit",
 	}).format(date);
-
-	const handleEdit = () => {
-		navigate(`/board/${columnId}/task/${task.id}`);
-	};
 	const touchTimeout = useRef<ReturnType<typeof setTimeout>>();
 	const [touchCount, setTouchCount] = useState(0);
 
@@ -63,13 +64,18 @@ export function Card({ task, columnId, index, onUpdate, onDelete }: CardProps) {
 	};
 
 	return (
-		<div
+		<motion.div
 			ref={setNodeRef}
 			style={style}
 			{...attributes}
 			{...listeners}
-			className="group/card relative flex flex-col items-start p-4 mt-3 bg-white rounded-lg cursor-pointer bg-opacity-90 hover:bg-opacity-100"
-			draggable
+			layout
+			initial={{ opacity: 0, scale: 0.9 }}
+			animate={{
+				opacity: isDragging ? 0.5 : 1,
+				scale: isDragging ? 0.95 : 1,
+			}}
+			className="draggable-card group/card relative flex flex-col items-start p-4 mt-3 bg-white rounded-lg cursor-pointer bg-opacity-90 hover:bg-opacity-100"
 			onDoubleClick={handleEdit}
 			onTouchStart={handleTouch}
 		>
@@ -78,7 +84,7 @@ export function Card({ task, columnId, index, onUpdate, onDelete }: CardProps) {
 					className="w-4 h-4 fill-current"
 					onClick={(e) => {
 						e.stopPropagation();
-						onDelete(columnId, task.id);
+						handleDelete();
 					}}
 				/>
 			</button>
@@ -94,6 +100,6 @@ export function Card({ task, columnId, index, onUpdate, onDelete }: CardProps) {
 					<span className="ml-1 leading-none">{formattedDate}</span>
 				</div>
 			</div>
-		</div>
+		</motion.div>
 	);
 }

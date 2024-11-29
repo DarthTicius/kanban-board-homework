@@ -6,40 +6,22 @@ import {
 	DragOverEvent,
 	DragOverlay,
 	DragStartEvent,
-	PointerSensor,
-	rectIntersection,
-	useSensor,
-	useSensors,
 } from "@dnd-kit/core";
-import { TaskProp } from "@src/data/boardEntries";
+import { BoardProp, TaskProp } from "@src/data/boardEntries";
 import { useAppDispatch, useAppSelector } from "@src/hooks/redux";
-import {
-	addTask,
-	deleteTask,
-	moveTask,
-	updateTask,
-} from "@src/store/slices/boardSlice";
+import { deleteTask, moveTask } from "@src/store/slices/boardSlice";
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router";
 
-export function Board() {
-	const navigate = useNavigate();
-	const dispatch = useAppDispatch();
-	const boards = useAppSelector((state) => state.boards.boards);
-	const [activeId, setActiveId] = useState<string | null>(null);
-	const [dragOverlay, setDragOverlay] = useState<TaskProp | null>(null);
-
+const useFinders = (boards: BoardProp[]) => {
 	const findBoardByTaskId = useCallback(
-		(taskId: number) => {
-			return boards.find((board) =>
-				board.tasks.some((task) => task.id === taskId),
-			);
-		},
+		(taskId: TaskProp["id"]) =>
+			boards.find((board) => board.tasks.some((task) => task.id === taskId)),
 		[boards],
 	);
 
 	const findTask = useCallback(
-		(taskId: number) => {
+		(taskId: TaskProp["id"]) => {
 			for (const board of boards) {
 				const task = board.tasks.find((t) => t.id === taskId);
 				if (task) return task;
@@ -49,135 +31,93 @@ export function Board() {
 		[boards],
 	);
 
-	const sensors = useSensors(
-		useSensor(PointerSensor, {
-			activationConstraint: {
-				distance: 8,
-			},
-		}),
+	return { findBoardByTaskId, findTask };
+};
+
+export function Board() {
+	const navigate = useNavigate();
+	const dispatch = useAppDispatch();
+	const boards = useAppSelector((state) => state.boards.boards);
+
+	const [activeId, setActiveId] = useState<string | null>(null);
+	const [dragOverlay, setDragOverlay] = useState<TaskProp | null>(null);
+
+	const { findBoardByTaskId, findTask } = useFinders(boards);
+
+	const handleDragStart = useCallback(
+		(event: DragStartEvent) => {
+			const task = findTask(Number(event.active.id));
+			setActiveId(event.active.id.toString());
+			setDragOverlay(task || null);
+		},
+		[findTask],
+	);
+	const handleDragOver = useCallback(
+		(event: DragOverEvent) => {
+			const { active, over } = event;
+			if (!over || active.id === over.id) return;
+
+			const activeId = Number(active.id);
+			const overId = Number(over.id);
+
+			const activeBoard = findBoardByTaskId(activeId);
+			const overBoard = findBoardByTaskId(overId);
+
+			if (activeBoard && overBoard && activeBoard.id !== overBoard.id) {
+				const sourceIndex = activeBoard.tasks.findIndex(
+					(task) => task.id === activeId,
+				);
+				const destinationIndex = overBoard.tasks.findIndex(
+					(task) => task.id === overId,
+				);
+
+				dispatch(
+					moveTask({
+						activeId,
+						overId,
+						sourceBoardId: activeBoard.id,
+						destinationBoardId: overBoard.id,
+						sourceIndex,
+						destinationIndex,
+					}),
+				);
+			}
+		},
+		[dispatch, findBoardByTaskId],
+	);
+	const handleDragEnd = useCallback(
+		(event: DragEndEvent) => {
+			const { active, over } = event;
+
+			if (over) {
+				const task = findTask(Number(active.id));
+				const newBoardId = over.id;
+
+				if (task) {
+					dispatch(
+						moveTask({
+							activeId: task.id,
+							overId: Number(newBoardId),
+							sourceBoardId: task.boardId,
+							destinationBoardId: newBoardId.toString(),
+						}),
+					);
+				}
+			}
+			setDragOverlay(null);
+		},
+		[dispatch, findTask],
 	);
 
-	const handleDragStart = (event: DragStartEvent) => {
-		const { active } = event;
-		setActiveId(active.id.toString());
-
-		const task = findTask(Number(active.id));
-		if (task) {
-			setDragOverlay(task);
-		}
+	const handleAddTask = (columnId: string) => {
+		navigate(`/board/${columnId}/task/new`);
 	};
-
-	const handleDragOver = (event: DragOverEvent) => {
-		const { active, over } = event;
-		if (!over) {
-			return;
-		}
-
-		const activeId = Number(active.id);
-		const overId = Number(over.id);
-
-		const activeBoard = findBoardByTaskId(activeId);
-		const overBoard = findBoardByTaskId(overId);
-
-		if (!activeBoard || !overBoard) {
-			return;
-		}
-		if (activeId === overId) {
-			return;
-		}
-		const activeTaskIndex = activeBoard.tasks.findIndex(
-			(t) => t.id === activeId,
-		);
-		const overTaskIndex = overBoard.tasks.findIndex((t) => t.id === overId);
-		dispatch(
-			moveTask({
-				activeId: activeId,
-				overId: activeBoard.id,
-				sourceBoardId: activeBoard.id,
-				destinationBoardId: overBoard.id,
-			}),
-		);
-	};
-
-	const handleDragEnd = (event: DragEndEvent) => {
-		const { active, over } = event;
-		setActiveId(null);
-		setDragOverlay(null);
-
-		if (!over) return;
-
-		const activeBoard = findBoardByTaskId(Number(active.id));
-		const overBoardId = (over.data.current as { boardId?: string })?.boardId;
-		const overBoard = overBoardId
-			? boards.find((b) => b.id === overBoardId)
-			: findBoardByTaskId(Number(over.id));
-
-		if (!activeBoard || !overBoard) return;
-
-		dispatch(
-			moveTask({
-				activeId: Number(active.id),
-				overId: overBoardId
-					? activeBoard.tasks[activeBoard.tasks.length - 1]?.id
-					: Number(over.id),
-				sourceBoardId: activeBoard.id,
-				destinationBoardId: overBoard.id,
-			}),
-		);
-	};
-	const handleUpdateTask = (
-		boardId: string,
-		taskId: number,
-		updates: Partial<TaskProp>,
-	) => {
-		dispatch(updateTask({ boardId, taskId, updates }));
-	};
-
-	const handleDeleteTask = (boardId: string, taskId: number) => {
-		dispatch(deleteTask({ boardId, taskId }));
-	};
-
-	const handleMoveTask = (
-		taskId: number,
-		sourceBoardId: string,
-		destinationBoardId: string,
-		sourceIndex: number,
-		destinationIndex: number,
-	) => {
-		const sourceBoard = boards.find((board) => board.id === sourceBoardId);
-		const taskToMove = sourceBoard?.tasks[sourceIndex];
-
-		if (taskToMove) {
-			const overTask = boards.find((board) => board.id === destinationBoardId)
-				?.tasks[destinationIndex];
-
-			dispatch(
-				moveTask({
-					activeId: taskToMove.id,
-					overId: overTask?.id || taskToMove.id,
-					sourceBoardId,
-					destinationBoardId,
-				}),
-			);
-		}
-	};
-
-	const handleAddTask = (boardId: string) => {
-		const newTaskId = Date.now();
-		const newTask = {
-			title: "New Task",
-			content: "",
-			boardId,
-			id: newTaskId,
-		};
-		dispatch(addTask({ boardId, task: newTask }));
-		navigate(`/board/${boardId}/task/${newTaskId}`);
+	const handleDeleteTask = (taskId: number, boardId: string) => {
+		dispatch(deleteTask({ taskId, boardId }));
 	};
 
 	return (
 		<DndContext
-			sensors={sensors}
-			collisionDetection={rectIntersection}
 			onDragStart={handleDragStart}
 			onDragOver={handleDragOver}
 			onDragEnd={handleDragEnd}
@@ -194,10 +134,8 @@ export function Board() {
 								columnId={board.id}
 								title={board.title}
 								tasks={board.tasks}
-								onCreateTask={() => handleAddTask(board.id)}
-								onUpdateTask={handleUpdateTask}
+								onAddTask={() => handleAddTask(board.id)}
 								onDeleteTask={handleDeleteTask}
-								onMoveTask={handleMoveTask}
 							/>
 						))}
 					</div>
@@ -209,8 +147,7 @@ export function Board() {
 					<Card
 						task={dragOverlay}
 						columnId={dragOverlay.boardId}
-						index={-1}
-						onUpdate={handleUpdateTask}
+						index={0}
 						onDelete={handleDeleteTask}
 					/>
 				) : null}

@@ -18,11 +18,12 @@ export function TaskDetails({ onClose }: Props) {
 
 	// Get the task from Redux store
 	const task = useAppSelector((state) => {
-		if (!boardId || !taskId || isNew) return null;
-
-		const board = state.boards.boards.find((b) => b.id === boardId);
-		const foundTask = board?.tasks.find((t) => t.id === Number(taskId));
-		return foundTask || null;
+		if (!boardId || !taskId || isNew) {
+			return null;
+		}
+		return state.boards.boards
+			.find((board) => board.id === boardId)
+			?.tasks.find((task) => task.id.toString() === taskId);
 	});
 
 	// Load task data when component mounts or when task changes
