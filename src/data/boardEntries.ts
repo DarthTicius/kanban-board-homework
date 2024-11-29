@@ -3,6 +3,7 @@ export type TaskProp = {
 	boardId: string;
 	title: string;
 	content: string;
+	order?: number;
 };
 export type BoardProp = {
 	title: string;
@@ -78,21 +79,21 @@ export const initialBoardList: BoardProp[] = [
 		id: "ready",
 		tasks: [
 			{
-				id: 1,
+				id: 9,
 				boardId: "ready",
 				title: "A long long title of the card ",
 				content:
 					"Lorem ipsum, dolor sit amet consectetur adipisicing elit. Aut voluptatum, magni ullam doloribus aliquam quae optio consectetur odit ut tempora nobis et assumenda quidem molestiae recusandae, eius nulla facere provident.",
 			},
 			{
-				id: 2,
+				id: 10,
 				boardId: "ready",
 				title: "A long long title of the card ",
 				content:
 					"Lorem ipsum, dolor sit amet consectetur adipisicing elit. Aut voluptatum, magni ullam doloribus aliquam quae optio consectetur odit ut tempora nobis et assumenda quidem molestiae recusandae, eius nulla facere provident.",
 			},
 			{
-				id: 3,
+				id: 11,
 				boardId: "ready",
 				title: "A long long title of the card ",
 				content:
@@ -105,14 +106,14 @@ export const initialBoardList: BoardProp[] = [
 		id: "inProgress",
 		tasks: [
 			{
-				id: 1,
+				id: 12,
 				boardId: "inProgress",
 				title: "A long long title of the card ",
 				content:
 					"Lorem ipsum, dolor sit amet consectetur adipisicing elit. Aut voluptatum, magni ullam doloribus aliquam quae optio consectetur odit ut tempora nobis et assumenda quidem molestiae recusandae, eius nulla facere provident.",
 			},
 			{
-				id: 2,
+				id: 13,
 				boardId: "inProgress",
 				title: "A long long title of the card ",
 				content:
@@ -125,7 +126,7 @@ export const initialBoardList: BoardProp[] = [
 		id: "review",
 		tasks: [
 			{
-				id: 1,
+				id: 14,
 				boardId: "review",
 				title: "A long long title of the card ",
 				content:
@@ -138,7 +139,7 @@ export const initialBoardList: BoardProp[] = [
 		id: "discussion",
 		tasks: [
 			{
-				id: 1,
+				id: 15,
 				boardId: "discussion",
 				title: "A long long title of the card ",
 				content:
