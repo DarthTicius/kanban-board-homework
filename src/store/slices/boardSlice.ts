@@ -1,15 +1,25 @@
-import { UniqueIdentifier } from "@dnd-kit/core";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { BoardProp, initialBoardList, TaskProp } from "@src/data/boardEntries";
 
 type BoardState = {
 	boards: BoardProp[];
+	activeBoardId: string | null;
+};
+
+const getFromLocalStorage = <T>(key: string, fallback: T): T => {
+	const data = localStorage.getItem(key);
+	return data ? JSON.parse(data) : fallback;
+};
+const saveToLocalStorage = <T>(key: string, value: T): void => {
+	localStorage.setItem(key, JSON.stringify(value));
+};
+const reorderTasks = (tasks: TaskProp[]): TaskProp[] => {
+	return tasks.map((task, index) => ({ ...task, order: index }));
 };
 
 const initialState: BoardState = {
-	boards: localStorage.getItem("kanbanBoards")
-		? JSON.parse(localStorage.getItem("kanbanBoards")!)
-		: initialBoardList,
+	boards: getFromLocalStorage("kanbanBoards", initialBoardList),
+	activeBoardId: null,
 };
 
 const boardSlice = createSlice({
@@ -18,30 +28,31 @@ const boardSlice = createSlice({
 	reducers: {
 		setBoards: (state, action: PayloadAction<BoardProp[]>) => {
 			state.boards = action.payload;
-			localStorage.setItem("kanbanBoards", JSON.stringify(action.payload));
+			saveToLocalStorage("kanbanBoards", state.boards);
 		},
+
 		addTask: (
 			state,
 			action: PayloadAction<{ boardId: string; task: Partial<TaskProp> }>,
 		) => {
 			const { boardId, task } = action.payload;
-			const boardIndex = state.boards.findIndex(
-				(board) => board.id === boardId,
-			);
-
-			if (boardIndex !== -1) {
-				const newTask: TaskProp = {
-					id: Date.now(),
-					boardId,
-					title: task.title || "New Task",
-					content: task.content || "",
-					order: state.boards[boardIndex].tasks.length,
-				};
-
-				state.boards[boardIndex].tasks.push(newTask);
-				localStorage.setItem("kanbanBoards", JSON.stringify(state.boards));
+			const board = state.boards.find((board) => board.id === boardId);
+			if (!board) {
+				return;
 			}
+
+			const newTask: TaskProp = {
+				id: Date.now(),
+				boardId,
+				title: task.title || "New Task",
+				content: task.content || "",
+				order: board.tasks.length,
+			};
+
+			board.tasks.push(newTask);
+			saveToLocalStorage("kanbanBoards", state.boards);
 		},
+
 		updateTask: (
 			state,
 			action: PayloadAction<{
@@ -51,92 +62,93 @@ const boardSlice = createSlice({
 			}>,
 		) => {
 			const { boardId, taskId, updates } = action.payload;
-			const boardIndex = state.boards.findIndex(
-				(board) => board.id === boardId,
-			);
-
-			if (boardIndex !== -1) {
-				const taskIndex = state.boards[boardIndex].tasks.findIndex(
-					(task) => task.id === taskId,
-				);
-
-				if (taskIndex !== -1) {
-					state.boards[boardIndex].tasks[taskIndex] = {
-						...state.boards[boardIndex].tasks[taskIndex],
-						...updates,
-					};
-					localStorage.setItem("kanbanBoards", JSON.stringify(state.boards));
-				}
+			const board = state.boards.find((board) => board.id === boardId);
+			if (!board) {
+				return;
 			}
+
+			const task = board.tasks.find((task) => task.id === taskId);
+			if (task) {
+				Object.assign(task, updates);
+			}
+			saveToLocalStorage("kanbanBoards", state.boards);
 		},
+
 		deleteTask: (
 			state,
 			action: PayloadAction<{ boardId: string; taskId: number }>,
 		) => {
 			const { boardId, taskId } = action.payload;
-			const boardIndex = state.boards.findIndex(
-				(board) => board.id === boardId,
-			);
-
-			if (boardIndex !== -1) {
-				state.boards[boardIndex].tasks = state.boards[boardIndex].tasks.filter(
-					(task) => task.id !== taskId,
-				);
+			const board = state.boards.find((board) => board.id === boardId);
+			if (!board) {
+				return;
 			}
+
+			board.tasks = board.tasks.filter((task) => task.id !== taskId);
+			saveToLocalStorage("kanbanBoards", state.boards);
 		},
+
 		moveTask: (
 			state,
 			action: PayloadAction<{
-				activeId: UniqueIdentifier;
-				overId: UniqueIdentifier;
+				activeId: number;
+				overId: number | null;
 				sourceBoardId: string;
 				destinationBoardId: string;
+				sourceIndex?: number;
+				destinationIndex?: number;
 			}>,
 		) => {
-			const { activeId, overId, sourceBoardId, destinationBoardId } =
-				action.payload;
+			const {
+				activeId,
+				overId,
+				sourceBoardId,
+				destinationBoardId,
+				sourceIndex,
+				destinationIndex,
+			} = action.payload;
 
-			const sourceBoardIndex = state.boards.findIndex(
+			const sourceBoard = state.boards.find(
 				(board) => board.id === sourceBoardId,
 			);
-			const destinationBoardIndex = state.boards.findIndex(
+			const destinationBoard = state.boards.find(
 				(board) => board.id === destinationBoardId,
 			);
 
-			if (sourceBoardIndex === -1 || destinationBoardIndex === -1) return;
+			if (!sourceBoard || !destinationBoard) {
+				return;
+			}
 
-			const sourceBoard = state.boards[sourceBoardIndex];
-			const destinationBoard = state.boards[destinationBoardIndex];
-
-			const taskToMove = sourceBoard.tasks.find((task) => task.id === activeId);
-			if (!taskToMove) return;
-
-			sourceBoard.tasks = sourceBoard.tasks.filter(
-				(task) => task.id !== activeId,
+			const taskIndex = sourceBoard.tasks.findIndex(
+				(task) => task.id === activeId,
 			);
-			const overTaskIndex = destinationBoard.tasks.findIndex(
-				(task) => task.id === overId,
-			);
+			if (taskIndex === -1) {
+				return;
+			}
 
-			const destinationIndex =
-				overTaskIndex !== -1 ? overTaskIndex : destinationBoard.tasks.length;
-
+			const [taskToMove] = sourceBoard.tasks.splice(taskIndex, 1);
 			if (sourceBoardId !== destinationBoardId) {
 				taskToMove.boardId = destinationBoardId;
 			}
-			destinationBoard.tasks.splice(destinationIndex, 0, {
-				...taskToMove,
-				order: destinationIndex,
-			});
-			destinationBoard.tasks = destinationBoard.tasks.map((task, index) => ({
-				...task,
-				order: index,
-			}));
 
-			localStorage.setItem("kanbanBoards", JSON.stringify(state.boards));
+			const insertIndex = destinationIndex ?? destinationBoard.tasks.length;
+			destinationBoard.tasks.splice(insertIndex, 0, taskToMove);
+
+			sourceBoard.tasks = reorderTasks(sourceBoard.tasks);
+			destinationBoard.tasks = reorderTasks(destinationBoard.tasks);
+
+			sourceBoard.tasks.forEach((task, index) => {
+				task.order = index + 1;
+			});
+			destinationBoard.tasks.forEach((task, index) => {
+				task.order = index + 1;
+			});
+
+			saveToLocalStorage("kanbanBoards", state.boards);
 		},
 	},
 });
 
-export const { addTask, updateTask, deleteTask, moveTask } = boardSlice.actions;
+export const { addTask, updateTask, deleteTask, moveTask, setBoards } =
+	boardSlice.actions;
 export default boardSlice.reducer;
