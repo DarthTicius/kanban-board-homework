@@ -11,12 +11,12 @@ export function Header() {
 		{
 			id: 'about',
 			name: 'About',
-			href: '/about'
+			href: '/#'
 		},
 		{
 			id: 'contact',
 			name: 'Contact',
-			href: '/contact'
+			href: '/#'
 		}
 	] as const;
 	return (
