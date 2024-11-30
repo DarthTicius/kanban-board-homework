@@ -20,7 +20,7 @@ export function Header() {
 		}
 	] as const;
 	return (
-		<header className="py-2 mb-4 border-b">
+		<header className="pb-2 pt-4 px-4 mb-4 border-b">
 			<nav
 				className="relative z-30 mx-auto"
 				role="navigation"
@@ -77,7 +77,7 @@ export function Header() {
 					</ul>
 				</div>
 				{openMenu ? (
-					<div className="absolute left-auto right-0 mx-auto w-full max-w-[290px] overflow-hidden overflow-y-visible bg-white lg:hidden">
+					<div className="absolute left-auto right-0 top-full mx-auto w-full max-w-[290px] overflow-hidden overflow-y-visible bg-white lg:hidden shadow-md">
 						<ul
 							role="menu"
 							className="flex flex-col items-start justify-center px-4"
