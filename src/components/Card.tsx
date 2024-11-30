@@ -46,7 +46,7 @@ export function Card({ id, task, colorScheme, onDelete }: CardProps) {
 	const [touchCount, setTouchCount] = useState(0);
 
 	const handleTouch = (e: TouchEvent) => {
-		e.preventDefault();
+		// e.preventDefault();
 		setTouchCount((prev) => prev + 1);
 
 		if (touchTimeout.current) {
@@ -65,7 +65,6 @@ export function Card({ id, task, colorScheme, onDelete }: CardProps) {
 
 	return (
 		<div
-
 			ref={setNodeRef}
 			style={style}
 			className="draggable-card group/card relative flex flex-col items-start p-4 mt-3 bg-white rounded-lg cursor-pointer bg-opacity-90 hover:bg-opacity-100"
@@ -84,8 +83,7 @@ export function Card({ id, task, colorScheme, onDelete }: CardProps) {
 			<button
 				{...attributes}
 				{...listeners}
-				type="button"
-				className="absolute bottom-2.5 right-0 hidden items-center justify-center w-5 h-5 mt-3 mr-2 text-gray-500 rounded group-hover/card:bg-gray-200 group-hover/card:text-gray-700 group-hover/card:flex z-10"
+				className="absolute bottom-2.5 right-0 hidden items-center justify-center w-5 h-5 mt-3 mr-2 text-gray-500 rounded group-hover/card:bg-gray-200 group-hover/card:text-gray-700 group-hover/card:flex z-10 touch-none"
 				onClick={(e) => e.stopPropagation()}
 			>
 				<DragIcon className="w-3.5 h-3.5 p-0.5" />
