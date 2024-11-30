@@ -1,9 +1,7 @@
 export type TaskProp = {
-	id: number;
-	boardId: string;
+	id: string;
 	title: string;
 	content: string;
-	order?: number;
 };
 export type BoardProp = {
 	title: string;
@@ -17,57 +15,49 @@ export const initialBoardList: BoardProp[] = [
 		id: "done",
 		tasks: [
 			{
-				id: 1,
-				boardId: "done",
+				id: "1",
 				title: "A long long title of the card ",
 				content:
 					"Lorem ipsum, dolor sit amet consectetur adipisicing elit. Aut voluptatum, magni ullam doloribus aliquam quae optio consectetur odit ut tempora nobis et assumenda quidem molestiae recusandae, eius nulla facere provident.",
 			},
 			{
-				id: 2,
-				boardId: "done",
+				id: "2",
 				title: "A long long title of the card ",
 				content:
 					"Lorem ipsum, dolor sit amet consectetur adipisicing elit. Aut voluptatum, magni ullam doloribus aliquam quae optio consectetur odit ut tempora nobis et assumenda quidem molestiae recusandae, eius nulla facere provident.",
 			},
 			{
-				id: 3,
-				boardId: "done",
+				id: "3",
 				title: "A long long title of the card ",
 				content:
 					"Lorem ipsum, dolor sit amet consectetur adipisicing elit. Aut voluptatum, magni ullam doloribus aliquam quae optio consectetur odit ut tempora nobis et assumenda quidem molestiae recusandae, eius nulla facere provident.",
 			},
 			{
-				id: 4,
-				boardId: "done",
+				id: "4",
 				title: "A long long title of the card ",
 				content:
 					"Lorem ipsum, dolor sit amet consectetur adipisicing elit. Aut voluptatum, magni ullam doloribus aliquam quae optio consectetur odit ut tempora nobis et assumenda quidem molestiae recusandae, eius nulla facere provident.",
 			},
 			{
-				id: 5,
-				boardId: "done",
+				id: "5",
 				title: "A long long title of the card ",
 				content:
 					"Lorem ipsum, dolor sit amet consectetur adipisicing elit. Aut voluptatum, magni ullam doloribus aliquam quae optio consectetur odit ut tempora nobis et assumenda quidem molestiae recusandae, eius nulla facere provident.",
 			},
 			{
-				id: 6,
-				boardId: "done",
+				id: "6",
 				title: "A long long title of the card ",
 				content:
 					"Lorem ipsum, dolor sit amet consectetur adipisicing elit. Aut voluptatum, magni ullam doloribus aliquam quae optio consectetur odit ut tempora nobis et assumenda quidem molestiae recusandae, eius nulla facere provident.",
 			},
 			{
-				id: 7,
-				boardId: "done",
+				id: "7",
 				title: "A long long title of the card ",
 				content:
 					"Lorem ipsum, dolor sit amet consectetur adipisicing elit. Aut voluptatum, magni ullam doloribus aliquam quae optio consectetur odit ut tempora nobis et assumenda quidem molestiae recusandae, eius nulla facere provident.",
 			},
 			{
-				id: 8,
-				boardId: "done",
+				id: "8",
 				title: "A long long title of the card ",
 				content:
 					"Lorem ipsum, dolor sit amet consectetur adipisicing elit. Aut voluptatum, magni ullam doloribus aliquam quae optio consectetur odit ut tempora nobis et assumenda quidem molestiae recusandae, eius nulla facere provident.",
@@ -79,22 +69,19 @@ export const initialBoardList: BoardProp[] = [
 		id: "ready",
 		tasks: [
 			{
-				id: 9,
-				boardId: "ready",
+				id: "9",
 				title: "A long long title of the card ",
 				content:
 					"Lorem ipsum, dolor sit amet consectetur adipisicing elit. Aut voluptatum, magni ullam doloribus aliquam quae optio consectetur odit ut tempora nobis et assumenda quidem molestiae recusandae, eius nulla facere provident.",
 			},
 			{
-				id: 10,
-				boardId: "ready",
+				id: "10",
 				title: "A long long title of the card ",
 				content:
 					"Lorem ipsum, dolor sit amet consectetur adipisicing elit. Aut voluptatum, magni ullam doloribus aliquam quae optio consectetur odit ut tempora nobis et assumenda quidem molestiae recusandae, eius nulla facere provident.",
 			},
 			{
-				id: 11,
-				boardId: "ready",
+				id: "11",
 				title: "A long long title of the card ",
 				content:
 					"Lorem ipsum, dolor sit amet consectetur adipisicing elit. Aut voluptatum, magni ullam doloribus aliquam quae optio consectetur odit ut tempora nobis et assumenda quidem molestiae recusandae, eius nulla facere provident.",
@@ -106,15 +93,13 @@ export const initialBoardList: BoardProp[] = [
 		id: "inProgress",
 		tasks: [
 			{
-				id: 12,
-				boardId: "inProgress",
+				id: "12",
 				title: "A long long title of the card ",
 				content:
 					"Lorem ipsum, dolor sit amet consectetur adipisicing elit. Aut voluptatum, magni ullam doloribus aliquam quae optio consectetur odit ut tempora nobis et assumenda quidem molestiae recusandae, eius nulla facere provident.",
 			},
 			{
-				id: 13,
-				boardId: "inProgress",
+				id: "13",
 				title: "A long long title of the card ",
 				content:
 					"Lorem ipsum, dolor sit amet consectetur adipisicing elit. Aut voluptatum, magni ullam doloribus aliquam quae optio consectetur odit ut tempora nobis et assumenda quidem molestiae recusandae, eius nulla facere provident.",
@@ -126,8 +111,7 @@ export const initialBoardList: BoardProp[] = [
 		id: "review",
 		tasks: [
 			{
-				id: 14,
-				boardId: "review",
+				id: "14",
 				title: "A long long title of the card ",
 				content:
 					"Lorem ipsum, dolor sit amet consectetur adipisicing elit. Aut voluptatum, magni ullam doloribus aliquam quae optio consectetur odit ut tempora nobis et assumenda quidem molestiae recusandae, eius nulla facere provident.",
@@ -139,8 +123,7 @@ export const initialBoardList: BoardProp[] = [
 		id: "discussion",
 		tasks: [
 			{
-				id: 15,
-				boardId: "discussion",
+				id: "15",
 				title: "A long long title of the card ",
 				content:
 					"Lorem ipsum, dolor sit amet consectetur adipisicing elit. Aut voluptatum, magni ullam doloribus aliquam quae optio consectetur odit ut tempora nobis et assumenda quidem molestiae recusandae, eius nulla facere provident.",

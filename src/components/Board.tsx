@@ -6,120 +6,190 @@ import {
 	DragOverEvent,
 	DragOverlay,
 	DragStartEvent,
+	KeyboardSensor,
+	PointerSensor,
+	rectIntersection,
+	UniqueIdentifier,
+	useSensor,
+	useSensors,
 } from "@dnd-kit/core";
-import { BoardProp, TaskProp } from "@src/data/boardEntries";
+import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { useAppDispatch, useAppSelector } from "@src/hooks/redux";
-import { deleteTask, moveTask } from "@src/store/slices/boardSlice";
-import { useCallback, useState } from "react";
+import { deleteTask, moveTaskBetweenBoards, reorderTasks, setActiveDragItem, setOverContainer } from "@src/store/slices/boardSlice";
 import { useNavigate } from "react-router";
-
-const useFinders = (boards: BoardProp[]) => {
-	const findBoardByTaskId = useCallback(
-		(taskId: TaskProp["id"]) =>
-			boards.find((board) => board.tasks.some((task) => task.id === taskId)),
-		[boards],
-	);
-
-	const findTask = useCallback(
-		(taskId: TaskProp["id"]) => {
-			for (const board of boards) {
-				const task = board.tasks.find((t) => t.id === taskId);
-				if (task) return task;
-			}
-			return null;
-		},
-		[boards],
-	);
-
-	return { findBoardByTaskId, findTask };
-};
 
 export function Board() {
 	const navigate = useNavigate();
 	const dispatch = useAppDispatch();
 	const boards = useAppSelector((state) => state.boards.boards);
-
-	const [activeId, setActiveId] = useState<string | null>(null);
-	const [dragOverlay, setDragOverlay] = useState<TaskProp | null>(null);
-
-	const { findBoardByTaskId, findTask } = useFinders(boards);
-
-	const handleDragStart = useCallback(
-		(event: DragStartEvent) => {
-			const task = findTask(Number(event.active.id));
-			setActiveId(event.active.id.toString());
-			setDragOverlay(task || null);
-		},
-		[findTask],
+	const activeTaskId = useAppSelector((state) => state.boards.activeTaskId);
+	const activeTask = useAppSelector((state) => state.boards.activeTask);
+	const overContainerId = useAppSelector((state) => state.boards.overContainerId);
+	// const [boards, setBoards] = useState<BoardProp[]>(initialBoardList);
+	// const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
+	// const [activeItem, setActiveItem] = useState<TaskProp | null>(null);
+	// const [overContainer, setOverContainer] = useState<UniqueIdentifier | null>(
+	// 	null,
+	// );
+	const sensors = useSensors(
+		useSensor(PointerSensor),
+		useSensor(KeyboardSensor, {
+			coordinateGetter: sortableKeyboardCoordinates,
+		}),
 	);
-	const handleDragOver = useCallback(
-		(event: DragOverEvent) => {
-			const { active, over } = event;
-			if (!over || active.id === over.id) {
-				return;
+
+	const findBoardById = (id: UniqueIdentifier) => {
+		return boards.find((board) => board.id === id);
+	};
+
+	const findBoardByItemId = (id: UniqueIdentifier) => {
+		return boards.find((board) => board.tasks.some((task) => task.id === id));
+	};
+
+	const handleDragStart = (event: DragStartEvent) => {
+		const { active } = event;
+		const sourceBoard = findBoardByItemId(active.id);
+		const item = sourceBoard?.tasks.find((task) => task.id === active.id);
+		dispatch(setActiveDragItem({
+			taskId: active.id.toString(),
+			task: item || null
+		}));
+		// setActiveId(active.id);
+		// setActiveItem(item || null);
+	};
+	const handleDragOver = (event: DragOverEvent) => {
+		const { active, over } = event;
+		console.log("DragOver Event:", { active, over });
+		if (!over) {
+			return;
+		}
+		const activeBoard = findBoardByItemId(active.id);
+		if (!activeBoard) {
+			return;
+		}
+		const overId = over.id;
+		let destinationBoard = findBoardById(overId.toString());
+
+		if (!destinationBoard) {
+			destinationBoard = findBoardByItemId(overId);
+		}
+		if (!destinationBoard) {
+			return;
+		}
+		console.log("Boards:", { activeBoard, destinationBoard });
+
+		// setOverContainer(destinationBoard.id);
+		dispatch(setOverContainer(destinationBoard.id));
+		if (activeBoard.id === destinationBoard.id) {
+			return;
+		}
+		dispatch(moveTaskBetweenBoards({
+			activeId: active.id.toString(),
+			overId: over.id.toString(),
+			sourceBoardId: activeBoard.id,
+			destinationBoardId: destinationBoard.id,
+		}));
+		// setBoards((prev) => {
+		// 	const newBoards = prev.map((board) => ({
+		// 		...board,
+		// 		items: [...board.tasks],
+		// 	}));
+
+		// 	// Remove from source board
+		// 	const sourceBoardIndex = newBoards.findIndex(
+		// 		(board) => board.id === activeBoard.id,
+		// 	);
+		// 	const itemIndex = newBoards[sourceBoardIndex].items.findIndex(
+		// 		(item) => item.id === active.id,
+		// 	);
+
+		// 	if (itemIndex !== -1) {
+		// 		const [item] = newBoards[sourceBoardIndex].items.splice(itemIndex, 1);
+
+		// 		// Add to destination board
+		// 		const destinationBoardIndex = newBoards.findIndex(
+		// 			(board) => board.id === destinationBoard.id,
+		// 		);
+		// 		newBoards[destinationBoardIndex].items.push(item);
+		// 	}
+
+		// 	return newBoards;
+		// });
+	}
+
+	const handleDragEnd = (event: DragEndEvent) => {
+		const { active, over } = event;
+		if (!over) {
+			return;
+		}
+
+		const activeBoard = findBoardByItemId(active.id);
+		if (!activeBoard) {
+			return;
+		}
+		// Destination board
+		let destinationBoard = findBoardById(over.id);
+		if (!destinationBoard) {
+			destinationBoard = findBoardByItemId(over.id);
+		}
+
+		if (!destinationBoard) {
+			return;
+		}
+		if (activeBoard.id === destinationBoard.id) {
+			const items = destinationBoard.tasks;
+			const oldIndex = items.findIndex(item => item.id === active.id);
+			const newIndex = items.findIndex(item => item.id === over.id);
+
+			if (oldIndex !== -1 && newIndex !== -1) {
+				dispatch(reorderTasks({
+					boardId: activeBoard.id,
+					oldIndex,
+					newIndex,
+				}));
 			}
+		}
 
-			const activeIdx = Number(activeId);
-			const overId = Number(over.id);
+		dispatch(setActiveDragItem({ taskId: null, task: null }));
+		dispatch(setOverContainer(null));
+		// setBoards((prev) => {
+		// 	const newBoards = prev.map((board) => ({
+		// 		...board,
+		// 		items: [...board.tasks],
+		// 	}));
 
-			const activeBoard = findBoardByTaskId(activeIdx);
-			const overBoard = findBoardByTaskId(overId);
+		// 	if (activeBoard.id === destinationBoard.id) {
+		// 		// Reordering inside same board
+		// 		const boardIndex = newBoards.findIndex(
+		// 			(board) => board.id === activeBoard.id,
+		// 		);
+		// 		const items = newBoards[boardIndex].items;
+		// 		const oldIndex = items.findIndex((item) => item.id === active.id);
+		// 		const newIndex = items.findIndex((item) => item.id === over.id);
 
-			if (activeBoard && overBoard && activeBoard.id !== overBoard.id) {
-				const sourceIndex = activeBoard.tasks.findIndex(
-					(task) => task.id === activeIdx,
-				);
-				const destinationIndex = overBoard.tasks.findIndex(
-					(task) => task.id === overId,
-				);
+		// 		if (oldIndex !== -1 && newIndex !== -1) {
+		// 			newBoards[boardIndex].items = arrayMove(items, oldIndex, newIndex);
+		// 		}
+		// 	}
 
-				dispatch(
-					moveTask({
-						activeId: activeIdx,
-						overId,
-						sourceBoardId: activeBoard.id,
-						destinationBoardId: overBoard.id,
-						sourceIndex,
-						destinationIndex,
-					}),
-				);
-			}
-		},
-		[dispatch, findBoardByTaskId],
-	);
-	const handleDragEnd = useCallback(
-		(event: DragEndEvent) => {
-			const { active, over } = event;
-
-			if (over) {
-				const task = findTask(Number(active.id));
-				const newBoardId = over.id;
-
-				if (task) {
-					dispatch(
-						moveTask({
-							activeId: task.id,
-							overId: Number(newBoardId),
-							sourceBoardId: task.boardId,
-							destinationBoardId: newBoardId.toString(),
-						}),
-					);
-				}
-			}
-			setDragOverlay(null);
-		},
-		[dispatch, findTask],
-	);
+		// 	return newBoards;
+		// });
+		// setActiveId(null);
+		// setActiveItem(null);
+		// setOverContainer(null);
+	}
 
 	const handleAddTask = (columnId: string) => {
 		navigate(`/board/${columnId}/task/new`);
 	};
-	const handleDeleteTask = (taskId: number, boardId: string) => {
+	const handleDeleteTask = (taskId: string, boardId: string) => {
 		dispatch(deleteTask({ taskId, boardId }));
 	};
 
 	return (
 		<DndContext
+			sensors={sensors}
+			collisionDetection={rectIntersection}
 			onDragStart={handleDragStart}
 			onDragOver={handleDragOver}
 			onDragEnd={handleDragEnd}
@@ -133,9 +203,10 @@ export function Board() {
 						{boards.map((board) => (
 							<Column
 								key={board.id}
-								columnId={board.id}
+								id={board.id}
 								title={board.title}
-								tasks={board.tasks}
+								items={board.tasks}
+								isOver={board.id === overContainerId}
 								onAddTask={() => handleAddTask(board.id)}
 								onDeleteTask={handleDeleteTask}
 							/>
@@ -145,12 +216,8 @@ export function Board() {
 			</div>
 
 			<DragOverlay>
-				{dragOverlay ? (
-					<Card
-						task={dragOverlay}
-						columnId={dragOverlay.boardId}
-						onDelete={handleDeleteTask}
-					/>
+				{activeTaskId && activeTask ? (
+					<Card id={activeTaskId.toString()} task={activeTask} onDelete={handleDeleteTask} />
 				) : null}
 			</DragOverlay>
 		</DndContext>

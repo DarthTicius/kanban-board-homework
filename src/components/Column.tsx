@@ -8,36 +8,38 @@ import { DownCaret } from "@src/assets/icons/DownCaret";
 import { TaskProp } from "@src/data/boardEntries";
 
 type Props = {
+	id: string;
 	title: string;
-	tasks: TaskProp[];
-	columnId: string;
+	items: TaskProp[];
+	isOver: boolean;
 	onAddTask: () => void;
-	onDeleteTask: (taskId: number, boardId: string) => void;
+	onDeleteTask: (taskId: string, boardId: string) => void;
 };
 
 export function Column({
-	columnId,
+	id,
 	title,
-	tasks,
+	items,
+	isOver,
 	onAddTask,
 	onDeleteTask,
 }: Props) {
-	const { setNodeRef, isOver } = useDroppable({
-		id: columnId,
-		data: { type: "column", boardId: columnId },
+	const { setNodeRef } = useDroppable({
+		id: id,
 	});
 
 	return (
 		<div
+			ref={setNodeRef}
 			className={`group/column flex flex-col flex-shrink-0 w-full md:w-72 ${isOver ? "bg-indigo-50" : ""
 				}`}
 		>
-			<details open data-column-id={columnId}>
+			<details open >
 				<summary className="flex justify-between items-center h-10 px-2">
 					<div className="flex items-center">
 						<h2 className="text-sm font-semibold">{title}</h2>
 						<span className="ml-2 flex items-center justify-center w-5 h-5 text-sm font-semibold text-indigo-500 bg-white rounded bg-opacity-30">
-							{tasks.length}
+							{items.length}
 						</span>
 					</div>
 					<div className="flex items-center">
@@ -64,21 +66,23 @@ export function Column({
 				</summary>
 
 				<SortableContext
-					id={columnId}
-					items={tasks.map((task) => task.id)}
+					items={items.map((task) => task.id)}
 					strategy={verticalListSortingStrategy}
 				>
-					<div className="space-y-4 pb-4" ref={setNodeRef}>
-						{tasks.map((task) => (
+					<div className="space-y-4 pb-4">
+						{items.map((task) => (
 							<Card
 								key={task.id}
+								id={task.id}
 								task={task}
-								columnId={columnId}
-								onDelete={() => onDeleteTask(task.id, columnId)}
+								onDelete={() => onDeleteTask(task.id, id)}
 							/>
 						))}
 					</div>
 				</SortableContext>
+				{items.length === 0 && (
+					<div className="text-center text-gray-400 py-4">Drop items here</div>
+				)}
 			</details>
 		</div>
 	);
