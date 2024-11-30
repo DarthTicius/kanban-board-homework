@@ -26,6 +26,9 @@ const initialState: BoardState = {
 	overContainerId: null,
 };
 
+if (!localStorage.getItem("kanbanBoards")) {
+	saveToLocalStorage("kanbanBoards", initialBoardList);
+}
 const boardSlice = createSlice({
 	name: "boards",
 	initialState,
@@ -37,18 +40,23 @@ const boardSlice = createSlice({
 
 		addTask: (
 			state,
-			action: PayloadAction<{ boardId: string; task: Partial<TaskProp> }>,
+			action: PayloadAction<{
+				columnId: string;
+				task: Partial<TaskProp>;
+			}>,
 		) => {
-			const { boardId, task } = action.payload;
-			const board = state.boards.find((board) => board.id === boardId);
+			const { columnId, task } = action.payload;
+			const board = state.boards.find((board) => board.id === columnId);
+
 			if (!board) {
+				console.error(`Board with ID ${columnId} not found.`);
 				return;
 			}
 
 			const newTask: TaskProp = {
 				id: String(Date.now()),
-				title: task.title || "New Task",
-				content: task.content || "",
+				title: task.title?.trim() || "Untitled Task",
+				content: task.content?.trim() || "",
 			};
 
 			board.tasks.push(newTask);
@@ -58,21 +66,44 @@ const boardSlice = createSlice({
 		updateTask: (
 			state,
 			action: PayloadAction<{
-				boardId: string;
-				taskId: string;
 				updates: Partial<TaskProp>;
+				activeBoardId: string;
+				activeTaskId: string;
+				isNew?: boolean;
 			}>,
 		) => {
-			const { boardId, taskId, updates } = action.payload;
-			const board = state.boards.find((board) => board.id === boardId);
+			const { updates, activeBoardId, activeTaskId, isNew } = action.payload;
+
+			const board = state.boards.find((board) => board.id === activeBoardId);
 			if (!board) {
+				console.error(`Board with ID ${activeBoardId} not found.`);
 				return;
 			}
 
-			const task = board.tasks.find((task) => task.id === taskId);
-			if (task) {
-				Object.assign(task, updates);
+			if (isNew) {
+				const newTask: TaskProp = {
+					id: String(Date.now()),
+					title: updates.title || "New Task",
+					content: updates.content || "",
+				};
+				board.tasks.push(newTask);
+			} else {
+				const taskIndex = board.tasks.findIndex(
+					(task) => task.id === activeTaskId,
+				);
+				if (taskIndex === -1) {
+					console.error(`Task with ID ${activeTaskId} not found.`);
+					return;
+				}
+
+				board.tasks[taskIndex] = {
+					...board.tasks[taskIndex],
+					...updates,
+					title: updates.title?.trim() || board.tasks[taskIndex].title,
+					content: updates.content?.trim() || board.tasks[taskIndex].content,
+				};
 			}
+
 			saveToLocalStorage("kanbanBoards", state.boards);
 		},
 
