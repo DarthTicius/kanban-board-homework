@@ -14,7 +14,6 @@ type CardProps = {
 };
 export function Card({ id, task, onDelete }: CardProps) {
 	const navigate = useNavigate();
-	console.log("CardProps:", { id, task, onDelete });
 
 	const { attributes, listeners, setNodeRef, transform, transition } =
 		useSortable({ id });
@@ -92,7 +91,7 @@ export function Card({ id, task, onDelete }: CardProps) {
 			</button>
 
 			<h3 className="flex items-center h-6 px-3 text-xs font-semibold bg-pink-100 rounded-full">
-				{task.id} {task.title}
+				<span className="italic">(id:{task.id})</span> {task.title}
 			</h3>
 			<div className="overflow-hidden text-ellipsis whitespace-normal line-clamp-2">
 				<p className="mt-3 text-sm font-medium ">{task.content}</p>

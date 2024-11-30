@@ -120,7 +120,7 @@ const boardSlice = createSlice({
 			board.tasks = board.tasks.filter((task) => task.id !== taskId);
 			saveToLocalStorage("kanbanBoards", state.boards);
 		},
-		//
+
 		setActiveDragItem: (
 			state,
 			action: PayloadAction<{ taskId: string | null; task: TaskProp | null }>,
@@ -183,59 +183,6 @@ const boardSlice = createSlice({
 				saveToLocalStorage("kanbanBoards", state.boards);
 			}
 		},
-
-		// moveTask: (
-		// 	state,
-		// 	action: PayloadAction<{
-		// 		activeId: number;
-		// 		overId: number | null;
-		// 		sourceBoardId: string;
-		// 		destinationBoardId: string;
-		// 		sourceIndex?: number;
-		// 		destinationIndex?: number;
-		// 	}>,
-		// ) => {
-		// 	const { activeId, sourceBoardId, destinationBoardId, destinationIndex } =
-		// 		action.payload;
-
-		// 	const sourceBoard = state.boards.find(
-		// 		(board) => board.id === sourceBoardId,
-		// 	);
-		// 	const destinationBoard = state.boards.find(
-		// 		(board) => board.id === destinationBoardId,
-		// 	);
-
-		// 	if (!sourceBoard || !destinationBoard) {
-		// 		return;
-		// 	}
-
-		// 	const taskIndex = sourceBoard.tasks.findIndex(
-		// 		(task) => task.id === activeId,
-		// 	);
-		// 	if (taskIndex === -1) {
-		// 		return;
-		// 	}
-
-		// 	const [taskToMove] = sourceBoard.tasks.splice(taskIndex, 1);
-		// 	if (sourceBoardId !== destinationBoardId) {
-		// 		taskToMove.boardId = destinationBoardId;
-		// 	}
-
-		// 	const insertIndex = destinationIndex ?? destinationBoard.tasks.length;
-		// 	destinationBoard.tasks.splice(insertIndex, 0, taskToMove);
-
-		// 	sourceBoard.tasks = reorderTasks(sourceBoard.tasks);
-		// 	destinationBoard.tasks = reorderTasks(destinationBoard.tasks);
-
-		// 	sourceBoard.tasks.forEach((task, index) => {
-		// 		task.order = index + 1;
-		// 	});
-		// 	destinationBoard.tasks.forEach((task, index) => {
-		// 		task.order = index + 1;
-		// 	});
-
-		// 	saveToLocalStorage("kanbanBoards", state.boards);
-		// },
 	},
 });
 

@@ -25,12 +25,6 @@ export function Board() {
 	const activeTaskId = useAppSelector((state) => state.boards.activeTaskId);
 	const activeTask = useAppSelector((state) => state.boards.activeTask);
 	const overContainerId = useAppSelector((state) => state.boards.overContainerId);
-	// const [boards, setBoards] = useState<BoardProp[]>(initialBoardList);
-	// const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
-	// const [activeItem, setActiveItem] = useState<TaskProp | null>(null);
-	// const [overContainer, setOverContainer] = useState<UniqueIdentifier | null>(
-	// 	null,
-	// );
 	const sensors = useSensors(
 		useSensor(PointerSensor),
 		useSensor(KeyboardSensor, {
@@ -54,12 +48,10 @@ export function Board() {
 			taskId: active.id.toString(),
 			task: item || null
 		}));
-		// setActiveId(active.id);
-		// setActiveItem(item || null);
 	};
 	const handleDragOver = (event: DragOverEvent) => {
 		const { active, over } = event;
-		console.log("DragOver Event:", { active, over });
+
 		if (!over) {
 			return;
 		}
@@ -76,9 +68,7 @@ export function Board() {
 		if (!destinationBoard) {
 			return;
 		}
-		console.log("Boards:", { activeBoard, destinationBoard });
 
-		// setOverContainer(destinationBoard.id);
 		dispatch(setOverContainer(destinationBoard.id));
 		if (activeBoard.id === destinationBoard.id) {
 			return;
@@ -89,32 +79,6 @@ export function Board() {
 			sourceBoardId: activeBoard.id,
 			destinationBoardId: destinationBoard.id,
 		}));
-		// setBoards((prev) => {
-		// 	const newBoards = prev.map((board) => ({
-		// 		...board,
-		// 		items: [...board.tasks],
-		// 	}));
-
-		// 	// Remove from source board
-		// 	const sourceBoardIndex = newBoards.findIndex(
-		// 		(board) => board.id === activeBoard.id,
-		// 	);
-		// 	const itemIndex = newBoards[sourceBoardIndex].items.findIndex(
-		// 		(item) => item.id === active.id,
-		// 	);
-
-		// 	if (itemIndex !== -1) {
-		// 		const [item] = newBoards[sourceBoardIndex].items.splice(itemIndex, 1);
-
-		// 		// Add to destination board
-		// 		const destinationBoardIndex = newBoards.findIndex(
-		// 			(board) => board.id === destinationBoard.id,
-		// 		);
-		// 		newBoards[destinationBoardIndex].items.push(item);
-		// 	}
-
-		// 	return newBoards;
-		// });
 	}
 
 	const handleDragEnd = (event: DragEndEvent) => {
@@ -152,31 +116,6 @@ export function Board() {
 
 		dispatch(setActiveDragItem({ taskId: null, task: null }));
 		dispatch(setOverContainer(null));
-		// setBoards((prev) => {
-		// 	const newBoards = prev.map((board) => ({
-		// 		...board,
-		// 		items: [...board.tasks],
-		// 	}));
-
-		// 	if (activeBoard.id === destinationBoard.id) {
-		// 		// Reordering inside same board
-		// 		const boardIndex = newBoards.findIndex(
-		// 			(board) => board.id === activeBoard.id,
-		// 		);
-		// 		const items = newBoards[boardIndex].items;
-		// 		const oldIndex = items.findIndex((item) => item.id === active.id);
-		// 		const newIndex = items.findIndex((item) => item.id === over.id);
-
-		// 		if (oldIndex !== -1 && newIndex !== -1) {
-		// 			newBoards[boardIndex].items = arrayMove(items, oldIndex, newIndex);
-		// 		}
-		// 	}
-
-		// 	return newBoards;
-		// });
-		// setActiveId(null);
-		// setActiveItem(null);
-		// setOverContainer(null);
 	}
 
 	const handleAddTask = (columnId: string) => {
