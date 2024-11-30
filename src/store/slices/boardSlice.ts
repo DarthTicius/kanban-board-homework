@@ -151,17 +151,17 @@ const boardSlice = createSlice({
 				(board) => board.id === destinationBoardId,
 			);
 
-			if (!sourceBoard || !destinationBoard) return;
+			if (!sourceBoard || !destinationBoard) {
+				return;
+			}
 
 			const taskIndex = sourceBoard.tasks.findIndex(
 				(task) => task.id === activeId,
 			);
-			if (taskIndex === -1) return;
-
-			// Remove task from source board
+			if (taskIndex === -1) {
+				return;
+			}
 			const [movedTask] = sourceBoard.tasks.splice(taskIndex, 1);
-
-			// Add task to destination board
 			destinationBoard.tasks.push(movedTask);
 
 			saveToLocalStorage("kanbanBoards", state.boards);
