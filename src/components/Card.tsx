@@ -66,7 +66,7 @@ export function Card({ id, task, colorScheme, onDelete }: CardProps) {
 		<div
 			ref={setNodeRef}
 			style={style}
-			className="draggable-card group/card relative flex flex-col items-start p-4 mt-3 bg-white rounded-lg cursor-pointer bg-opacity-90 hover:bg-opacity-100"
+			className="draggable-card group/card relative flex flex-col items-start p-4 mt-3 bg-white rounded-lg cursor-pointer bg-opacity-90 hover:bg-opacity-100 shadow-sm"
 			onDoubleClick={handleEdit}
 			onTouchStart={handleTouch}
 		>
