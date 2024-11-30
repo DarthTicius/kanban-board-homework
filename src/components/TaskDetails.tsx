@@ -11,59 +11,76 @@ type Props = {
 export function TaskDetails({ onClose }: Props) {
 	const navigate = useNavigate();
 	const dispatch = useAppDispatch();
-	const { boardId, taskId } = useParams<{ boardId: string; taskId: string }>();
+	const { boardId, taskId } = useParams<{ boardId: string; taskId?: string }>();
+	const isNew = taskId === "new";
 	const [title, setTitle] = useState("");
 	const [content, setContent] = useState("");
-	const [isNew] = useState(!taskId || taskId === "new");
+	const boards = useAppSelector((state) => state.boards.boards);
 
-	// Get the task from Redux store
 	const task = useAppSelector((state) => {
-		if (!boardId || !taskId || isNew) {
+		if (!boardId) {
+			console.error("Board ID is missing.");
 			return null;
 		}
-		return state.boards.boards
-			.find((board) => board.id === boardId)
-			?.tasks.find((task) => task.id.toString() === taskId);
+		if (isNew) {
+			return null;
+		}
+
+		const boardWithTask = state.boards.boards.find((board) =>
+			board.tasks.some((t) => t.id === taskId),
+		);
+
+		if (!boardWithTask) {
+			console.error(`No board found containing task with ID ${taskId}`);
+			return null;
+		}
+
+		const foundTask = boardWithTask.tasks.find((t) => t.id === taskId);
+
+		return foundTask || null;
 	});
 
-	// Load task data when component mounts or when task changes
 	useEffect(() => {
-		if (task) {
+		if (task && !isNew) {
 			setTitle(task.title);
-			setContent(task.content);
+			setContent(task.content || "");
 		}
-	}, [task]);
+	}, [task, isNew]);
 
 	const handleSave = () => {
 		if (!title.trim()) {
 			alert("Task title cannot be empty.");
 			return;
 		}
-
-		if (!boardId) {
-			console.error("Missing boardId");
+		const boardWithTask = boards.find((board) =>
+			board.tasks.some((t) => t.id === taskId),
+		);
+		const actualBoardId = boardWithTask?.id || boardId;
+		if (!actualBoardId) {
+			console.error("Board ID is missing.");
 			return;
 		}
 
 		if (isNew) {
 			dispatch(
 				addTask({
-					boardId,
+					columnId: actualBoardId,
 					task: {
-						title,
-						content,
+						title: title.trim(),
+						content: content.trim(),
 					},
 				}),
 			);
 		} else {
 			dispatch(
 				updateTask({
-					boardId,
-					taskId: Number(taskId),
+					activeBoardId: actualBoardId,
+					activeTaskId: taskId || "",
 					updates: {
-						title,
-						content,
+						title: title.trim(),
+						content: content.trim(),
 					},
+					isNew: false,
 				}),
 			);
 		}
