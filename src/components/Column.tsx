@@ -27,6 +27,13 @@ export function Column({
 	const { setNodeRef } = useDroppable({
 		id: id,
 	});
+	const colorScheme: Record<string, string> = {
+		done: "bg-green-300",
+		ready: "bg-gray-300",
+		inProgress: "bg-yellow-200",
+		review: "bg-blue-300",
+		discussion: "bg-purple-300",
+	};
 
 	return (
 		<div
@@ -34,7 +41,7 @@ export function Column({
 			className={`group/column flex flex-col flex-shrink-0 w-full md:w-72 ${isOver ? "bg-indigo-50" : ""
 				}`}
 		>
-			<details open >
+			<details open>
 				<summary className="flex justify-between items-center h-10 px-2">
 					<div className="flex items-center">
 						<h2 className="text-sm font-semibold">{title}</h2>
@@ -75,6 +82,7 @@ export function Column({
 								key={task.id}
 								id={task.id}
 								task={task}
+								colorScheme={colorScheme[id]}
 								onDelete={() => onDeleteTask(task.id, id)}
 							/>
 						))}

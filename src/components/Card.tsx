@@ -11,8 +11,9 @@ type CardProps = {
 	id: string;
 	task: TaskProp;
 	onDelete?: (taskId: string, boardId: string) => void;
+	colorScheme?: string;
 };
-export function Card({ id, task, onDelete }: CardProps) {
+export function Card({ id, task, colorScheme, onDelete }: CardProps) {
 	const navigate = useNavigate();
 
 	const { attributes, listeners, setNodeRef, transform, transition } =
@@ -89,10 +90,13 @@ export function Card({ id, task, onDelete }: CardProps) {
 			>
 				<DragIcon className="w-3.5 h-3.5 p-0.5" />
 			</button>
-
-			<h3 className="flex items-center h-6 px-3 text-xs font-semibold bg-pink-100 rounded-full">
-				<span className="italic">(id:{task.id})</span> {task.title}
-			</h3>
+			<div
+				className={`flex max-w-[28ch] items-center h-6 px-3 text-xs font-semibold rounded-full ${colorScheme}`}
+			>
+				<h3 className={`text-ellipsis text-nowrap overflow-hidden`}>
+					{task.title}
+				</h3>
+			</div>
 			<div className="overflow-hidden text-ellipsis whitespace-normal line-clamp-2">
 				<p className="mt-3 text-sm font-medium ">{task.content}</p>
 			</div>
