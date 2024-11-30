@@ -4,7 +4,7 @@ import { Calendar } from "@src/assets/icons/Calendar";
 import { CloseIcon } from "@src/assets/icons/Close";
 import { DragIcon } from "@src/assets/icons/DragIcon";
 import { TaskProp } from "@src/data/boardEntries";
-import { useRef, useState, type TouchEvent } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router";
 
 type CardProps = {
@@ -45,8 +45,7 @@ export function Card({ id, task, colorScheme, onDelete }: CardProps) {
 	const touchTimeout = useRef<ReturnType<typeof setTimeout>>();
 	const [touchCount, setTouchCount] = useState(0);
 
-	const handleTouch = (e: TouchEvent) => {
-		// e.preventDefault();
+	const handleTouch = () => {
 		setTouchCount((prev) => prev + 1);
 
 		if (touchTimeout.current) {
